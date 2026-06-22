@@ -1,1 +1,324 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
+local player = Players.LocalPlayer
+
+local Settings = {
+    WalkSpeed = 300,
+    MinJump = 130,
+}
+
+-- =========================
+-- CHARACTER HANDLER (FIXED)
+-- =========================
+
+local character
+local humanoid
+
+local function setupCharacter(char)
+    character = char
+    humanoid = character:WaitForChild("Humanoid")
+end
+
+setupCharacter(player.Character or player.CharacterAdded:Wait())
+
+player.CharacterAdded:Connect(function(char)
+    setupCharacter(char)
+end)
+
+-- =========================
+-- LOADING SCREEN + STARS
+-- =========================
+
+local LoadingGui = Instance.new("ScreenGui")
+LoadingGui.Name = "LoadingScreen"
+LoadingGui.ResetOnSpawn = false
+LoadingGui.Parent = player:WaitForChild("PlayerGui")
+
+local LoadFrame = Instance.new("Frame")
+LoadFrame.Size = UDim2.new(1,0,1,0)
+LoadFrame.BackgroundColor3 = Color3.fromRGB(10,10,15)
+LoadFrame.Parent = LoadingGui
+
+local starRunning = true
+
+task.spawn(function()
+    while starRunning do
+        local star = Instance.new("TextLabel")
+        star.Size = UDim2.new(0,10,0,10)
+        star.BackgroundTransparency = 1
+        star.Text = "✦"
+        star.TextColor3 = Color3.fromRGB(200,200,255)
+        star.Font = Enum.Font.GothamBold
+        star.TextScaled = true
+        star.Position = UDim2.new(math.random(),0,-0.1,0)
+        star.Parent = LoadingGui
+
+        task.spawn(function()
+            while star.Parent and starRunning do
+                star.Position += UDim2.new(0,0,0.015,0)
+                star.Rotation += 2
+                if star.Position.Y.Scale > 1.1 then
+                    star:Destroy()
+                    break
+                end
+                task.wait(0.03)
+            end
+        end)
+
+        task.wait(0.06)
+    end
+end)
+
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0,360,0,200)
+Main.Position = UDim2.new(0.5,0,0.5,0)
+Main.AnchorPoint = Vector2.new(0.5,0.5)
+Main.BackgroundColor3 = Color3.fromRGB(15,15,20)
+Main.Parent = LoadFrame
+Instance.new("UICorner", Main)
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Thickness = 2
+Stroke.Color = Color3.fromRGB(170,85,255)
+Stroke.Parent = Main
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1,0,0,60)
+Title.Position = UDim2.new(0,0,0.15,0)
+Title.BackgroundTransparency = 1
+Title.Text = "Dansh Premium Hub"
+Title.TextColor3 = Color3.fromRGB(235,235,235)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Main
+
+local Sub = Instance.new("TextLabel")
+Sub.Size = UDim2.new(1,0,0,30)
+Sub.Position = UDim2.new(0,0,0.42,0)
+Sub.BackgroundTransparency = 1
+Sub.Text = "Loading..."
+Sub.TextColor3 = Color3.fromRGB(160,160,160)
+Sub.TextScaled = true
+Sub.Font = Enum.Font.Gotham
+Sub.Parent = Main
+
+local BarBG = Instance.new("Frame")
+BarBG.Size = UDim2.new(0.8,0,0,10)
+BarBG.Position = UDim2.new(0.1,0,0.7,0)
+BarBG.BackgroundColor3 = Color3.fromRGB(30,30,35)
+BarBG.Parent = Main
+Instance.new("UICorner", BarBG)
+
+local Bar = Instance.new("Frame")
+Bar.Size = UDim2.new(0,0,1,0)
+Bar.BackgroundColor3 = Color3.fromRGB(170,85,255)
+Bar.Parent = BarBG
+Instance.new("UICorner", Bar)
+
+for i = 1, 100 do
+    Bar.Size = UDim2.new(i/100,0,1,0)
+    task.wait(0.01)
+end
+
+starRunning = false
+LoadingGui:Destroy()
+
+-- =========================
+-- MAIN UI
+-- =========================
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DanshPremium"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0,187,0,300)
+MainFrame.Position = UDim2.new(0.5,-93,0.5,-150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,25)
+MainFrame.Parent = ScreenGui
+Instance.new("UICorner", MainFrame)
+
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1,0,0,28)
+TopBar.BackgroundColor3 = Color3.fromRGB(30,30,35)
+TopBar.Parent = MainFrame
+Instance.new("UICorner", TopBar)
+
+local Credit = Instance.new("TextLabel")
+Credit.Size = UDim2.new(0.6,0,1,0)
+Credit.Position = UDim2.new(0,6,0,0)
+Credit.BackgroundTransparency = 1
+Credit.Text = "Dansh Kumar Script"
+Credit.TextColor3 = Color3.fromRGB(200,200,200)
+Credit.TextSize = 11
+Credit.Font = Enum.Font.Gotham
+Credit.TextXAlignment = Enum.TextXAlignment.Left
+Credit.Parent = TopBar
+
+local RedBtn = Instance.new("TextButton")
+RedBtn.Size = UDim2.new(0,22,0,22)
+RedBtn.Position = UDim2.new(1,-25,0,3)
+RedBtn.Text = "X"
+RedBtn.Parent = TopBar
+Instance.new("UICorner", RedBtn)
+
+local Content = Instance.new("Frame")
+Content.Size = UDim2.new(1,-10,1,-40)
+Content.Position = UDim2.new(0,5,0,32)
+Content.BackgroundTransparency = 1
+Content.Parent = MainFrame
+
+local Status = Instance.new("TextLabel")
+Status.Size = UDim2.new(1,0,0,16)
+Status.BackgroundTransparency = 1
+Status.Text = "Loaded"
+Status.TextScaled = true
+Status.Parent = Content
+
+-- =========================
+-- TOGGLES + BOXES
+-- =========================
+
+local autoSpeedEnabled = true
+local autoJumpEnabled = true
+
+local function createToggle(name,y,state)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1,0,0,24)
+    b.Position = UDim2.new(0,0,0,y)
+    b.BackgroundColor3 = state and Color3.fromRGB(60,160,100) or Color3.fromRGB(50,50,55)
+    b.Text = name..": "..(state and "ON" or "OFF")
+    b.Parent = Content
+    Instance.new("UICorner", b)
+
+    b.MouseButton1Click:Connect(function()
+        if name == "Auto Speed" then
+            autoSpeedEnabled = not autoSpeedEnabled
+            b.Text = "Auto Speed: "..(autoSpeedEnabled and "ON" or "OFF")
+        else
+            autoJumpEnabled = not autoJumpEnabled
+            b.Text = "Auto Jump: "..(autoJumpEnabled and "ON" or "OFF")
+        end
+    end)
+
+    return b
+end
+
+createToggle("Auto Speed",4,true)
+createToggle("Auto Jump",30,true)
+
+local function createBox(label,y,default)
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(1,0,0,24)
+    box.Position = UDim2.new(0,0,0,y)
+    box.BackgroundColor3 = Color3.fromRGB(45,45,50)
+    box.Text = label..": "..default
+    box.Parent = Content
+    Instance.new("UICorner", box)
+    return box
+end
+
+local SpeedBox = createBox("Speed",56,Settings.WalkSpeed)
+local JumpBox = createBox("Jump",82,Settings.MinJump)
+
+-- =========================
+-- SCRIPT BUTTONS
+-- =========================
+
+local function createBtn(name,y,url)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1,0,0,24)
+    b.Position = UDim2.new(0,0,0,y)
+    b.Text = name
+    b.Parent = Content
+    Instance.new("UICorner", b)
+
+    b.MouseButton1Click:Connect(function()
+        loadstring(game:HttpGet(url))()
+        Status.Text = name.." Loaded!"
+    end)
+end
+
+createBtn("Dansh Camlock",108,"https://raw.githubusercontent.com/Aepione/Prensado/refs/heads/main/Prensado%20camlock")
+createBtn("NewRedz Script",132,"https://raw.githubusercontent.com/newredzv3/Scripts/refs/heads/main/main.luau")
+createBtn("CentuDox Hub",156,"https://raw.githubusercontent.com/JustParadozCode/CentuDox-Hub/refs/heads/main/CentuDox.xyz")
+createBtn("Quantum Onyx",180,"https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
+createBtn("Hermanos Hub",204,"https://raw.githubusercontent.com/hermanos-dev/hermanos-hub/refs/heads/main/Loader.lua")
+
+-- ==================== NEW BUTTON ====================
+createBtn("dansh ka onion",228,"https://api.luarmor.net/files/v4/loaders/cc815ef92aaf3ed41a37aa4d87cd93ff.lua")
+
+-- =========================
+-- MINIMIZE
+-- =========================
+
+local minimized = false
+local originalSize = MainFrame.Size
+
+RedBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        MainFrame.Size = UDim2.new(0,187,0,28)
+        Content.Visible = false
+    else
+        MainFrame.Size = originalSize
+        Content.Visible = true
+    end
+end)
+
+-- =========================
+-- STATS
+-- =========================
+
+RunService.RenderStepped:Connect(function()
+    if not humanoid then return end
+
+    local s = tonumber(SpeedBox.Text:match("%d+")) or Settings.WalkSpeed
+    local j = tonumber(JumpBox.Text:match("%d+")) or Settings.MinJump
+
+    humanoid.WalkSpeed = autoSpeedEnabled and math.clamp(s,1,500) or 16
+    humanoid.JumpPower = autoJumpEnabled and math.clamp(j,1,500) or 50
+end)
+
+-- =========================
+-- DRAGGING
+-- =========================
+
+local dragging = false
+local dragInput, dragStart, startPos
+local targetPos = MainFrame.Position
+
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragInput = input
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if not dragging then return end
+    if input \~= dragInput then return end
+
+    local delta = input.Position - dragStart
+    local newX = startPos.X.Offset + delta.X
+    local newY = startPos.Y.Offset + delta.Y
+
+    local screen = workspace.CurrentCamera.ViewportSize
+    local size = MainFrame.AbsoluteSize
+
+    newX = math.clamp(newX,0,screen.X-size.X)
+    newY = math.clamp(newY,0,screen.Y-size.Y)
+
+    targetPos = UDim2.new(0,newX,0,newY)
+end)
+
+RunService.RenderStepped:Connect(function()
+    MainFrame.Position = MainFrame.Position:Lerp(targetPos,0.18)
+end)
+
+print("Loaded - FULL FIXED VERSION + dansh ka onion Button")
